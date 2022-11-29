@@ -1,10 +1,18 @@
 package org.example;
 
+import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.Session;
 import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.*;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.*;
 
 public class Main {
@@ -25,7 +33,7 @@ public class Main {
             System.out.println("  3. start  instance                4. available regions");
             System.out.println("  5. stop   instance                6. create instance");
             System.out.println("  7. reboot instance                8. list images");
-            System.out.println("  9. terminate instance            10.");
+            System.out.println("  9. terminate instance            10. Watch condor status");
             System.out.println("                                   99. quit");
             System.out.println("------------------------------------------------------------");
             System.out.print("Select Menu : ");
@@ -61,6 +69,9 @@ public class Main {
             }
             else if (choice == 9){
                 TerminateInstance(ec2);
+            }
+            else if (choice == 10){
+                WatchCondorStatus(ec2);
             }
             else {
                 System.out.println(" Stopping Service ");
@@ -399,6 +410,49 @@ public class Main {
                 System.exit(1);
             }
 
+        }
+    }
+
+    public static void WatchCondorStatus(Ec2Client ec2){
+        try{
+            JSch jSch = new JSch();
+            Channel channel = null;
+
+            String user = "ec2-user";
+            String host = "ec2-3-38-93-130.ap-northeast-2.compute.amazonaws.com";
+            int port = 22;
+            String privatekey = "C:\\Users\\GJ\\Cloud-home.pem";
+            String cscommand = "condor_status";
+            String response = "";
+            InputStream cs = new ByteArrayInputStream(cscommand.getBytes());
+
+            jSch.addIdentity(privatekey);
+            Session session = jSch.getSession(user, host, port);
+
+            session.setConfig("StrictHostKeyChecking","no");
+            session.setConfig("GSSAPIAuthentication","no");
+            session.setServerAliveInterval(120 * 1000);
+            session.setServerAliveCountMax(1000);
+            session.setConfig("TCPKeepAlive","yes");
+
+            session.connect();
+
+            channel = session.openChannel("exec");
+            ChannelExec channelExec = (ChannelExec) channel;
+
+            InputStream inputStream = channelExec.getInputStream();
+            channelExec.setCommand(cscommand);
+            channelExec.connect();
+
+            byte[] bytes = new byte[8192];
+            int decode;
+            StringBuilder result = new StringBuilder();
+            while((decode = inputStream.read(bytes, 0, bytes.length)) > 0) result.append(new String(bytes, 0, decode));
+
+            System.out.println(result);
+
+        } catch (Exception e){
+            e.printStackTrace();
         }
     }
 }

@@ -1,9 +1,7 @@
 package org.example;
 
 import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
-import software.amazon.awssdk.awscore.AwsRequest;
 import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.regions.internal.util.EC2MetadataUtils;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.*;
 
@@ -27,6 +25,7 @@ public class Main {
             System.out.println("  3. start  instance                4. available regions");
             System.out.println("  5. stop   instance                6. create instance");
             System.out.println("  7. reboot instance                8. list images");
+            System.out.println("  9. terminate instance            10.");
             System.out.println("                                   99. quit");
             System.out.println("------------------------------------------------------------");
             System.out.print("Select Menu : ");
@@ -60,6 +59,9 @@ public class Main {
             else if (choice == 8){
                 ListingImages(ec2);
             }
+            else if (choice == 9){
+                TerminateInstance(ec2);
+            }
             else {
                 System.out.println(" Stopping Service ");
                 break;
@@ -79,11 +81,11 @@ public class Main {
                 for (Reservation reservation : response.reservations()) {
                     for (Instance instance : reservation.instances()) {
                         System.out.println("Instance Id is              : " + instance.instanceId());
-                        // System.out.println("Image Id is                 : " + instance.imageId());
-                        // System.out.println("Instance type is            : " + instance.instanceType());
-                        // System.out.println("Instance state name is      : " + instance.state().name());
-                        // System.out.println("Monitoring information is   : " + instance.monitoring().state());
-                        // System.out.println("");
+                        System.out.println("Image Id is                 : " + instance.imageId());
+                        System.out.println("Instance type is            : " + instance.instanceType());
+                        System.out.println("Instance state name is      : " + instance.state().name());
+                        System.out.println("Monitoring information is   : " + instance.monitoring().state());
+                        System.out.println("");
                     }
                 }
                 System.out.println("[System] -- Wait 5 Second ---");
@@ -340,23 +342,35 @@ public class Main {
     }
 
     public static void ListingImages(Ec2Client ec2){
+        DescribeImagesRequest request = DescribeImagesRequest.builder().owners("self").build();
+        DescribeImagesResponse response = ec2.describeImages(request);
+        List images = response.images();
+        for(int i = 0; i < images.size(); i++){
+            String[] str = images.get(i).toString().split(",");
+            for(int j = 0; j < str.length; j++){
+                if(str[j].contains("ImageId")) System.out.println("1 :" + str[j]);
+            }
+        }
+    }
+
+    public static void TerminateInstance(Ec2Client ec2){
         String nextToken = null;
+        int InstanceNumber = 1;
+        int ChoiceInstance;
+        Map<Integer, Object> InstanceList = new HashMap<>();
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("------------------------------------------------------------");
         try {
             do {
                 DescribeInstancesRequest request = DescribeInstancesRequest.builder().maxResults(6).nextToken(nextToken).build();
                 DescribeInstancesResponse response = ec2.describeInstances(request);
                 for (Reservation reservation : response.reservations()) {
                     for (Instance instance : reservation.instances()) {
-                        // System.out.println("Instance Id is              : " + instance.instanceId());
-                        System.out.println("Image Id is                 : " + instance.imageId());
-                        // System.out.println("");
+                        System.out.println(" " + InstanceNumber + ". Instance Id is : " + instance.instanceId());
+                        InstanceList.put(InstanceNumber, instance.instanceId());
+                        InstanceNumber++;
                     }
-                }
-                System.out.println("[System] -- Wait 5 Second ---");
-                try{
-                    Thread.sleep(5000);
-                } catch (InterruptedException e){
-                    e.printStackTrace();
                 }
                 nextToken = response.nextToken();
             } while (nextToken != null);
@@ -364,6 +378,27 @@ public class Main {
         } catch (Ec2Exception e) {
             System.err.println(e.awsErrorDetails().errorCode());
             System.exit(1);
+        }
+
+        System.out.println("------------------------------------------------------------");
+        System.out.print("Select Instance(Back : 99) : ");
+        ChoiceInstance = scanner.nextInt();
+
+        if(ChoiceInstance == 99){
+            return;
+        } else {
+            try {
+                TerminateInstancesRequest request = TerminateInstancesRequest.builder()
+                        .instanceIds(InstanceList.get(ChoiceInstance).toString())
+                        .build();
+                TerminateInstancesResponse response = ec2.terminateInstances(request);
+                List<InstanceStateChange> list = response.terminatingInstances();
+                for(InstanceStateChange stateChange : list) System.out.println("[SYSTEM] TERMINATED INSTANCE - " + stateChange.instanceId());
+            } catch (Ec2Exception e){
+                System.err.println(e.awsErrorDetails().errorMessage());
+                System.exit(1);
+            }
+
         }
     }
 }

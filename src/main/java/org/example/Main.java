@@ -13,6 +13,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.net.ConnectException;
 import java.util.*;
 
 public class Main {
@@ -470,7 +471,13 @@ public class Main {
             session.setServerAliveCountMax(1000);
             session.setConfig("TCPKeepAlive","yes");
 
-            session.connect();
+            try {
+                session.connect();
+            } catch (Exception e){
+                System.out.println("[SYSTEM] Connection Error");
+                Thread.sleep(2000);
+                return;
+            }
 
             channel = session.openChannel("exec");
             ChannelExec channelExec = (ChannelExec) channel;

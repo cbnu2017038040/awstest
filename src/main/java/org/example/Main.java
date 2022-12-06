@@ -310,7 +310,7 @@ public class Main {
         System.out.println("------------------------------------------------------------");
         System.out.print("[STEP - 1] Write Name : ");
         Name = scanner.nextLine();
-        System.out.print("[STEP - 2] Write AMI Image ID(My Default - ami-09cf633fe86e51bf0)  : ");
+        System.out.print("[STEP - 2] Write AMI Image ID(HTCondor Default - ami-01ce54153115310df)  : ");
         ImageID = scanner.nextLine();
 
         RunInstancesRequest request = RunInstancesRequest.builder()

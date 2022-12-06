@@ -39,48 +39,82 @@ public class Main {
             System.out.print("Select Menu : ");
             choice = sc.nextInt();
 
-            if (choice == 99) {
-                System.out.println(" Stopping Service ");
-                break;
-            }
-            else if (choice == 1) {
-                ListingInstance(ec2);
-            }
-            else if (choice == 2){
-                ShowAvailableZones(ec2);
-            }
-            else if (choice == 3){
-                StartInstance(ec2);
-            }
-            else if (choice == 4){
-                ShowAvailableRegions(ec2);
-            }
-            else if (choice == 5){
-                StopInstance(ec2);
-            }
-            else if (choice == 6){
-                CreateInstance(ec2);
-            }
-            else if (choice == 7){
-                RebootInstance(ec2);
-            }
-            else if (choice == 8){
-                ListingImages(ec2);
-            }
-            else if (choice == 9){
-                TerminateInstance(ec2);
-            }
-            else if (choice == 10){
-                WatchCondorStatus(ec2);
-            }
-            else {
-                System.out.println(" Stopping Service ");
-                break;
+            /*
+                if (choice == 99) {
+                    System.out.println(" Stopping Service ");
+                    return;
+                } else if (choice == 1) {
+                    ListingInstance(ec2);
+                } else if (choice == 2) {
+                    ShowAvailableZones(ec2);
+                } else if (choice == 3) {
+                    StartInstance(ec2);
+                } else if (choice == 4) {
+                    ShowAvailableRegions(ec2);
+                } else if (choice == 5) {
+                    StopInstance(ec2);
+                } else if (choice == 6) {
+                    CreateInstance(ec2);
+                } else if (choice == 7) {
+                    RebootInstance(ec2);
+                } else if (choice == 8) {
+                    ListingImages(ec2);
+                } else if (choice == 9) {
+                    TerminateInstance(ec2);
+                } else if (choice == 10) {
+                    WatchCondorStatus(ec2);
+                } else if (choice > 10 && choice < 99) {
+                    System.out.println("[SYSTEM] Please Write Number 1~10 or 99");
+                } else {
+                    System.out.println("[SYSTEM] You Written Invaild Value. System Stopping ");
+                    break;
+                }
+             */
+
+            switch (choice){
+                case 1:
+                    ListingInstance(ec2);
+                    break;
+                case 2:
+                    ShowAvailableZones(ec2);
+                    break;
+                case 3:
+                    StartInstance(ec2);
+                    break;
+                case 4:
+                    ShowAvailableRegions(ec2);
+                    break;
+                case 5:
+                    StopInstance(ec2);
+                    break;
+                case 6:
+                    CreateInstance(ec2);
+                    break;
+                case 7:
+                    RebootInstance(ec2);
+                    break;
+                case 8:
+                    ListingImages(ec2);
+                    break;
+                case 9:
+                    TerminateInstance(ec2);
+                    break;
+                case 10:
+                    WatchCondorStatus(ec2);
+                    break;
+                case 99:
+                    System.out.println(" Stopping Service ");
+                    sc.close();
+                    ec2.close();
+                    return;
+                default:
+                    System.out.println("[SYSTEM] You Written Invaild Value. System Stopping ");
+                    sc.close();
+                    ec2.close();
+                    break;
+
             }
         }
-
-        sc.close();
-        ec2.close();
     }
 
     public static void ListingInstance(Ec2Client ec2){
@@ -219,7 +253,8 @@ public class Main {
         Map<Integer, Object> RunningInstanceList = new HashMap<>();
         Scanner scanner = new Scanner(System.in);
 
-        System.out.println("------------------------------------------------------------");
+        System.out.println("---------------------------------------------------------------");
+        System.out.println("[NOTICE] IF YOU STOP MASTER NODE, YOU CAN'T USE FUNC.10, TOO!!!");
         try {
             do {
                 DescribeInstancesRequest request = DescribeInstancesRequest.builder().maxResults(6).nextToken(nextToken).build();
@@ -419,7 +454,7 @@ public class Main {
             Channel channel = null;
 
             String user = "ec2-user";
-            String host = "ec2-3-38-93-130.ap-northeast-2.compute.amazonaws.com";
+            String host = "ec2-13-124-245-201.ap-northeast-2.compute.amazonaws.com";
             int port = 22;
             String privatekey = "C:\\Users\\GJ\\Cloud-home.pem";
             String cscommand = "condor_status";

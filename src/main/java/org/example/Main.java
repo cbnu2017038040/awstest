@@ -135,6 +135,8 @@ public class Main {
                         System.out.println("Instance type is            : " + instance.instanceType());
                         System.out.println("Instance state name is      : " + instance.state().name());
                         System.out.println("Monitoring information is   : " + instance.monitoring().state());
+                        System.out.println("Public DNS Name is          : " + instance.publicDnsName());
+                        System.out.println("Public IP Address is        : " + instance.publicIpAddress());
                         System.out.println("");
                     }
                 }
@@ -458,13 +460,16 @@ public class Main {
             JSch jSch = new JSch();
             Channel channel = null;
 
+            DescribeInstancesRequest request = DescribeInstancesRequest.builder().instanceIds("i-0858cd44bdaf8466d").build();
+            DescribeInstancesResponse response = ec2.describeInstances(request);
+            List<Reservation> reservation = response.reservations();
+            Instance instance = reservation.get(0).instances().get(0);
+
             String user = "ec2-user";
-            String host = "ec2-13-124-84-206.ap-northeast-2.compute.amazonaws.com";
+            String host = instance.publicDnsName();
             int port = 22;
             String privatekey = "C:\\Users\\GJ\\Cloud-home.pem";
             String cscommand = "condor_status";
-            String response = "";
-            InputStream cs = new ByteArrayInputStream(cscommand.getBytes());
 
             jSch.addIdentity(privatekey);
             Session session = jSch.getSession(user, host, port);

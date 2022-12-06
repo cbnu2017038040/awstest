@@ -126,6 +126,7 @@ public class Main {
                 DescribeInstancesResponse response = ec2.describeInstances(request);
                 for (Reservation reservation : response.reservations()) {
                     for (Instance instance : reservation.instances()) {
+
                         System.out.println("Instance Id is              : " + instance.instanceId());
                         System.out.println("Image Id is                 : " + instance.imageId());
                         System.out.println("Instance type is            : " + instance.instanceType());
@@ -455,7 +456,7 @@ public class Main {
             Channel channel = null;
 
             String user = "ec2-user";
-            String host = "ec2-13-124-245-201.ap-northeast-2.compute.amazonaws.com";
+            String host = "ec2-13-124-84-206.ap-northeast-2.compute.amazonaws.com";
             int port = 22;
             String privatekey = "C:\\Users\\GJ\\Cloud-home.pem";
             String cscommand = "condor_status";

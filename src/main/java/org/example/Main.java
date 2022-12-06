@@ -40,7 +40,7 @@ public class Main {
             System.out.print("Select Menu : ");
             choice = sc.nextInt();
 
-            /*
+
                 if (choice == 99) {
                     System.out.println(" Stopping Service ");
                     return;
@@ -70,8 +70,8 @@ public class Main {
                     System.out.println("[SYSTEM] You Written Invaild Value. System Stopping ");
                     break;
                 }
-             */
 
+                /*
             switch (choice){
                 case 1:
                     ListingInstance(ec2);
@@ -114,7 +114,10 @@ public class Main {
                     ec2.close();
                     break;
 
+
             }
+
+                 */
         }
     }
 

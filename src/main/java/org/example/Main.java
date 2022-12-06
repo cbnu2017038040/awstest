@@ -35,7 +35,7 @@ public class Main {
             System.out.println("  5. stop   instance                6. create instance");
             System.out.println("  7. reboot instance                8. list images");
             System.out.println("  9. terminate instance            10. Watch condor status");
-            System.out.println("                                   99. quit");
+            System.out.println("  11. command execute              99. quit");
             System.out.println("------------------------------------------------------------");
             System.out.print("Select Menu : ");
             choice = sc.nextInt();
@@ -64,7 +64,9 @@ public class Main {
                     TerminateInstance(ec2);
                 } else if (choice == 10) {
                     WatchCondorStatus(ec2);
-                } else if (choice > 10 && choice < 99) {
+                } else if (choice == 11) {
+                    CommandExecute(ec2);
+                } else if (choice > 11 && choice < 99) {
                     System.out.println("[SYSTEM] Please Write Number 1~10 or 99");
                 } else {
                     System.out.println("[SYSTEM] You Written Invaild Value. System Stopping ");
@@ -320,6 +322,7 @@ public class Main {
         RunInstancesRequest request = RunInstancesRequest.builder()
                 .imageId(ImageID)
                 .instanceType(InstanceType.T2_MICRO)
+                .keyName("Cloud-home")
                 .maxCount(1)
                 .minCount(1)
                 .build();
@@ -423,7 +426,7 @@ public class Main {
                 DescribeInstancesResponse response = ec2.describeInstances(request);
                 for (Reservation reservation : response.reservations()) {
                     for (Instance instance : reservation.instances()) {
-                        if(instance.instanceId().equals("i-0858cd44bdaf8466d")) System.out.println(" " + InstanceNumber + ". Instance(Running) Id is : " + instance.instanceId() + "[CONDOR MASTER]");
+                        if(instance.instanceId().equals("i-0858cd44bdaf8466d")) System.out.println(" " + InstanceNumber + ". Instance Id is : " + instance.instanceId() + "[CONDOR MASTER]");
                         else System.out.println(" " + InstanceNumber + ". Instance(Running) Id is : " + instance.instanceId());
                         InstanceList.put(InstanceNumber, instance.instanceId());
                         InstanceNumber++;
@@ -458,6 +461,102 @@ public class Main {
 
         }
     }
+
+    public static void CommandExecute(Ec2Client ec2){
+        String nextToken = null;
+        int InstanceNumber = 1;
+        int ChoiceInstance;
+        Map<Integer, Object> InstanceList = new HashMap<>();
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("------------------------------------------------------------");
+        try {
+            do {
+                DescribeInstancesRequest request = DescribeInstancesRequest.builder().maxResults(6).nextToken(nextToken).build();
+                DescribeInstancesResponse response = ec2.describeInstances(request);
+                for (Reservation reservation : response.reservations()) {
+                    for (Instance instance : reservation.instances()) {
+                        if(instance.instanceId().equals("i-0858cd44bdaf8466d")) System.out.println(" " + InstanceNumber + ". Instance Id is : " + instance.instanceId() + "[CONDOR MASTER]");
+                        else System.out.println(" " + InstanceNumber + ". Instance Id is : " + instance.instanceId());
+                        InstanceList.put(InstanceNumber, instance.instanceId());
+                        InstanceNumber++;
+
+                    }
+                }
+                nextToken = response.nextToken();
+            } while (nextToken != null);
+
+        } catch (Ec2Exception e) {
+            System.err.println(e.awsErrorDetails().errorCode());
+            System.exit(1);
+        }
+
+        System.out.println("------------------------------------------------------------");
+        System.out.print("Select Instance(Back : 99) : ");
+        ChoiceInstance = scanner.nextInt();
+
+        if(ChoiceInstance == 99){
+            return;
+        }
+        else {
+            try {
+                JSch jSch = new JSch();
+                Channel channel = null;
+                Scanner stscanner = new Scanner(System.in);
+
+                DescribeInstancesRequest request = DescribeInstancesRequest.builder().instanceIds(InstanceList.get(ChoiceInstance).toString()).build();
+                DescribeInstancesResponse response = ec2.describeInstances(request);
+                List<Reservation> reservation = response.reservations();
+                Instance instance = reservation.get(0).instances().get(0);
+
+                String user = "ec2-user";
+                String host = instance.publicDnsName();
+                int port = 22;
+                String privatekey = "C:\\Users\\GJ\\Cloud-home.pem";
+                String cscommand;
+
+                System.out.print("[SYSTEM] Write Command to Execute : ");
+                cscommand = stscanner.nextLine();
+
+                jSch.addIdentity(privatekey);
+                Session session = jSch.getSession(user, host, port);
+
+                session.setConfig("StrictHostKeyChecking","no");
+                session.setConfig("GSSAPIAuthentication","no");
+                session.setServerAliveInterval(120 * 1000);
+                session.setServerAliveCountMax(1000);
+                session.setConfig("TCPKeepAlive","yes");
+
+                try {
+                    session.connect();
+                } catch (Exception e){
+                    System.out.println("[SYSTEM] Connection Error");
+                    Thread.sleep(2000);
+                    return;
+                }
+
+                channel = session.openChannel("exec");
+                ChannelExec channelExec = (ChannelExec) channel;
+
+                InputStream inputStream = channelExec.getInputStream();
+                channelExec.setCommand(cscommand);
+                channelExec.connect();
+
+                byte[] bytes = new byte[8192];
+                int decode;
+                StringBuilder result = new StringBuilder();
+                while((decode = inputStream.read(bytes, 0, bytes.length)) > 0) result.append(new String(bytes, 0, decode));
+
+                System.out.println(result);
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+    }
+
 
     public static void WatchCondorStatus(Ec2Client ec2){
         try{

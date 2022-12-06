@@ -129,8 +129,8 @@ public class Main {
                 DescribeInstancesResponse response = ec2.describeInstances(request);
                 for (Reservation reservation : response.reservations()) {
                     for (Instance instance : reservation.instances()) {
-
-                        System.out.println("Instance Id is              : " + instance.instanceId());
+                        if(instance.instanceId().equals("i-0858cd44bdaf8466d")) System.out.println("Instance Id is              : " + instance.instanceId() + "[CONDOR MASTER]");
+                        else System.out.println("Instance Id is              : " + instance.instanceId());
                         System.out.println("Image Id is                 : " + instance.imageId());
                         System.out.println("Instance type is            : " + instance.instanceType());
                         System.out.println("Instance state name is      : " + instance.state().name());
@@ -195,7 +195,8 @@ public class Main {
                 for (Reservation reservation : response.reservations()) {
                     for (Instance instance : reservation.instances()) {
                         if(instance.state().name().toString().equals("stopped")) {
-                            System.out.println(" " + InstanceNumber + ". Instance(Stopped) Id is : " + instance.instanceId());
+                            if(instance.instanceId().equals("i-0858cd44bdaf8466d")) System.out.println(" " + InstanceNumber + ". Instance(Running) Id is : " + instance.instanceId() + "[CONDOR MASTER]");
+                            else System.out.println(" " + InstanceNumber + ". Instance(Running) Id is : " + instance.instanceId());
                             StoppedInstanceList.put(InstanceNumber, instance.instanceId());
                             InstanceNumber++;
                         }
@@ -269,7 +270,8 @@ public class Main {
                 for (Reservation reservation : response.reservations()) {
                     for (Instance instance : reservation.instances()) {
                         if (instance.state().name().toString().equals("running")) {
-                            System.out.println(" " + InstanceNumber + ". Instance(Running) Id is : " + instance.instanceId());
+                            if(instance.instanceId().equals("i-0858cd44bdaf8466d")) System.out.println(" " + InstanceNumber + ". Instance(Running) Id is : " + instance.instanceId() + "[CONDOR MASTER]");
+                            else System.out.println(" " + InstanceNumber + ". Instance(Running) Id is : " + instance.instanceId());
                             RunningInstanceList.put(InstanceNumber, instance.instanceId());
                             InstanceNumber++;
                         }
@@ -358,7 +360,8 @@ public class Main {
                 for (Reservation reservation : response.reservations()) {
                     for (Instance instance : reservation.instances()) {
                         if (instance.state().name().toString().equals("running")) {
-                            System.out.println(" " + InstanceNumber + ". Instance(Running) Id is : " + instance.instanceId());
+                            if(instance.instanceId().equals("i-0858cd44bdaf8466d")) System.out.println(" " + InstanceNumber + ". Instance(Running) Id is : " + instance.instanceId() + "[CONDOR MASTER]");
+                            else System.out.println(" " + InstanceNumber + ". Instance(Running) Id is : " + instance.instanceId());
                             RunningInstanceList.put(InstanceNumber, instance.instanceId());
                             InstanceNumber++;
                         }
@@ -420,7 +423,8 @@ public class Main {
                 DescribeInstancesResponse response = ec2.describeInstances(request);
                 for (Reservation reservation : response.reservations()) {
                     for (Instance instance : reservation.instances()) {
-                        System.out.println(" " + InstanceNumber + ". Instance Id is : " + instance.instanceId());
+                        if(instance.instanceId().equals("i-0858cd44bdaf8466d")) System.out.println(" " + InstanceNumber + ". Instance(Running) Id is : " + instance.instanceId() + "[CONDOR MASTER]");
+                        else System.out.println(" " + InstanceNumber + ". Instance(Running) Id is : " + instance.instanceId());
                         InstanceList.put(InstanceNumber, instance.instanceId());
                         InstanceNumber++;
                     }

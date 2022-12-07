@@ -197,8 +197,8 @@ public class Main {
                 for (Reservation reservation : response.reservations()) {
                     for (Instance instance : reservation.instances()) {
                         if(instance.state().name().toString().equals("stopped")) {
-                            if(instance.instanceId().equals("i-0858cd44bdaf8466d")) System.out.println(" " + InstanceNumber + ". Instance(Running) Id is : " + instance.instanceId() + "[CONDOR MASTER]");
-                            else System.out.println(" " + InstanceNumber + ". Instance(Running) Id is : " + instance.instanceId());
+                            if(instance.instanceId().equals("i-0858cd44bdaf8466d")) System.out.println(" " + InstanceNumber + ". Instance(Stopped) Id is : " + instance.instanceId() + "[CONDOR MASTER]");
+                            else System.out.println(" " + InstanceNumber + ". Instance(Stopped) Id is : " + instance.instanceId());
                             StoppedInstanceList.put(InstanceNumber, instance.instanceId());
                             InstanceNumber++;
                         }
